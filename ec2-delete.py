@@ -4,7 +4,7 @@ from botocore.exceptions import ClientError
 # Specify the instance IDs and their corresponding regions
 instances = {
     'i-09ce071be381753ca': 'eu-central-1',
-    'i-0914dd3217dbbfb9c': 'us-east-1'
+    'i-022dfd4f585373333': 'us-east-1'
 }
 
 for instance_id, region in instances.items():

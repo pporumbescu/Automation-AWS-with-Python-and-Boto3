@@ -16,6 +16,7 @@ def check_instance_status():
     except Exception as e:
         print(f"An error occurred: {e}")
 
+
 schedule.every(5).seconds.do(check_instance_status)
 
 while True:

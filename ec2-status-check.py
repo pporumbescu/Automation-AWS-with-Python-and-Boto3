@@ -1,6 +1,7 @@
 import boto3
 import schedule
 import logging
+import smtplib
 import time
 import os
 from botocore.exceptions import ClientError, BotoCoreError
@@ -13,6 +14,27 @@ AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 # Initialize boto3 client for a specific region
 ec2_client = boto3.client('ec2', region_name=AWS_REGION)
+
+# Retrieve email address and password from environment variables
+EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS')
+EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+
+
+def send_notification(instance_id, status_type, status):
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+            smtp.starttls()
+            smtp.ehlo()
+            smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            subject = f"Instance {instance_id} - {status_type} Status: {status}"
+            body = f"Instance {instance_id} has {status_type} status: {status}. Please check the instance."
+            msg = f"Subject: {subject}\n\n{body}"
+            smtp.sendmail(EMAIL_ADDRESS, EMAIL_ADDRESS, msg)
+            logging.info(f"Email notification sent for instance {instance_id}")
+    except smtplib.SMTPAuthenticationError as e:
+        logging.error(f"SMTP authentication error: {e}")
+    except Exception as e:
+        logging.error(f"An error occurred while sending email: {e}")
 
 
 def check_instance_status():
@@ -30,8 +52,11 @@ def check_instance_status():
                 logging.info(
                     f"Instance {instance_id} in region {AWS_REGION} is {state} with instance status {ins_status} and system status {sys_status}")
 
-                # Implement your notification logic here if instance or system status is not 'ok'
-                # ...
+                # Send notification if instance or system status is not 'ok'
+                if ins_status != 'ok':
+                    send_notification(instance_id, "Instance", ins_status)
+                if sys_status != 'ok':
+                    send_notification(instance_id, "System", sys_status)
 
     except (ClientError, BotoCoreError) as e:
         logging.error(f"An AWS error occurred: {e}")
@@ -49,4 +74,3 @@ try:
         time.sleep(1)
 except KeyboardInterrupt:
     logging.info("Script was terminated by the user")
-    # Perform any cleanup here if necessary

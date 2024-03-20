@@ -27,7 +27,7 @@ def check_website():
     """
     try:
         # Send a GET request to the website
-        response = requests.get('https://petruclouds.com/')
+        response = requests.get('https://petrucloudss.com/')
 
         # Check if the response status code is 200 (OK)
         if response.status_code == 200:
@@ -43,12 +43,14 @@ def check_website():
         msg = "Not accessible!"
         send_notification(msg)
 
-# Schedule the website check to run every 1 hour
-schedule.every(1).hours.do(check_website)
+check_website()
 
-while True:
-    # Run pending scheduled tasks
-    schedule.run_pending()
-
-    # Wait for 1 second before the next iteration
-    time.sleep(1)
+# # Schedule the website check to run every 1 hour
+# schedule.every(1).hours.do(check_website)
+#
+# while True:
+#     # Run pending scheduled tasks
+#     schedule.run_pending()
+#
+#     # Wait for 1 second before the next iteration
+#     time.sleep(1)

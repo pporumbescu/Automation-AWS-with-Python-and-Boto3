@@ -1,4 +1,6 @@
 import boto3
+import schedule
+import time
 from datetime import datetime, timezone
 
 def list_snapshots(region):
@@ -37,11 +39,10 @@ def delete_old_snapshots(region, tag_key=None, tag_value=None):
 
         # Get the current timestamp in UTC
         now = datetime.now(timezone.utc)
-        # Filter snapshots older than or equal to 0 days and with the specified tag (if provided)
+        # Filter snapshots older than or equal to 30 days and with the specified tag.
         snapshots_to_delete = [snapshot['SnapshotId'] for snapshot in snapshots
                                if (now - snapshot['StartTime']).days > 30
-                               and (tag_key is None or all(tag.get('Key') == tag_key and tag.get('Value') == tag_value for tag in snapshot.get('Tags', [])))]
-
+                               and any(tag.get('Key') == tag_key and tag.get('Value') == tag_value for tag in snapshot.get('Tags', []))]
         for snapshot_id in snapshots_to_delete:
             # Delete each snapshot individually
             ec2.delete_snapshot(SnapshotId=snapshot_id)
@@ -54,14 +55,23 @@ def delete_old_snapshots(region, tag_key=None, tag_value=None):
 
 # List of regions to process
 regions = ['us-east-1', 'eu-west-1']  # Add more regions as needed
-# Tag key for filtering snapshots (optional)
-tag_key = 'Environment'  # Specify the tag key for filtering (optional)
-# Tag value for filtering snapshots (optional)
-tag_value = 'Production'  # Specify the tag value for filtering (optional)
+# Tag key for filtering snapshots (compulsory)
+tag_key = 'env'  # Specify the tag key to filter snapshots
+# Tag value for filtering snapshots (compulsory)
+tag_value = 'prod'  # Specify the tag value to filter snapshots
 
-# Iterate over each region
-for region in regions:
-    # List all snapshots in the region
-    list_snapshots(region)
-    # Delete snapshots older than or equal to 0 days with the specified tag in the region
-    delete_old_snapshots(region, tag_key, tag_value)
+def run_snapshot_management():
+    # Iterate over each region
+    for region in regions:
+        # List all snapshots in the region
+        list_snapshots(region)
+        # Delete snapshots older than or equal to 30 days with the specified tag in the region
+        delete_old_snapshots(region, tag_key, tag_value)
+
+
+# Schedule the snapshot management task to run daily at 2:00 AM
+schedule.every().day.at("02:00").do(run_snapshot_management)
+
+while True:
+    schedule.run_pending()
+    time.sleep(60)  # Wait for 60 seconds before checking for the next scheduled task

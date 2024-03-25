@@ -1,5 +1,3 @@
-Based on the list of Python scripts you provided, it appears that these scripts are focused on automating various tasks related to AWS Elastic Compute Cloud (EC2) and Elastic Block Store (EBS) services. Here's a suggested README description for your GitHub repository:
-
 # AWS Automation Scripts
 
 This repository contains a collection of Python scripts designed to automate various tasks and operations within the Amazon Web Services (AWS) ecosystem. These scripts leverage the Boto3 library, which is the AWS SDK for Python, to interact with different AWS services programmatically.

@@ -42,15 +42,13 @@ region = 'us-east-1'
 # Optional: Specify tags to filter volumes (e.g., {'Environment': 'Production'})
 tags = {'env': 'prod'}
 
-create_volume_snapshots(region=region, tags=tags)
+# Schedule the script to run once a day at midnight
+schedule.every().day.at("00:00").do(create_volume_snapshots, region=region, tags=tags)
 
-# # Schedule the script to run once a day at midnight
-# schedule.every().day.at("00:00").do(create_volume_snapshots, region=region, tags=tags)
-#
-# # Run the scheduled tasks indefinitely
-# while True:
-#     # Check if any scheduled tasks are pending and run them
-#     schedule.run_pending()
-#
-#     # Pause the script for 1 second before checking for pending tasks again
-#     time.sleep(1)
+# Run the scheduled tasks indefinitely
+while True:
+    # Check if any scheduled tasks are pending and run them
+    schedule.run_pending()
+
+    # Pause the script for 1 second before checking for pending tasks again
+    time.sleep(1)
